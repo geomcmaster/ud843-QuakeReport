@@ -30,6 +30,7 @@ import java.util.ArrayList;
 public class EarthquakeActivity extends AppCompatActivity {
 
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
+    private EarthquakeAdapter mAdapter;
     private static final String QUERY = "http://earthquake.usgs.gov/fdsnws/event/1/" +
             "query?format=geojson&eventtype=earthquake&orderby=time&minmag=6&limit=10";
 
@@ -64,17 +65,17 @@ public class EarthquakeActivity extends AppCompatActivity {
         ListView earthquakeListView = (ListView) findViewById(R.id.list);
 
         // Create a new {@link ArrayAdapter} of earthquakes
-        final EarthquakeAdapter adapter = new EarthquakeAdapter(
+        mAdapter = new EarthquakeAdapter(
                 this, earthquakes);
 
         // Set the adapter on the {@link ListView}
         // so the list can be populated in the user interface
-        earthquakeListView.setAdapter(adapter);
+        earthquakeListView.setAdapter(mAdapter);
 
         earthquakeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String url = adapter.getItem(position).getUrl();
+                String url = mAdapter.getItem(position).getUrl();
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                 if (intent.resolveActivity(getPackageManager()) != null) {
                     startActivity(intent);

@@ -15,41 +15,42 @@
  */
 package com.example.android.quakereport;
 
+import android.app.LoaderManager;
 import android.content.Intent;
+import android.content.Loader;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import java.util.ArrayList;
 
-public class EarthquakeActivity extends AppCompatActivity {
+public class EarthquakeActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ArrayList<Earthquake>>{
 
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
     private EarthquakeAdapter mAdapter;
     private static final String QUERY = "http://earthquake.usgs.gov/fdsnws/event/1/" +
             "query?format=geojson&eventtype=earthquake&orderby=time&minmag=6&limit=10";
+    private static final int EARTHQUAKE_LOADER_ID = 1;
 
-    private class EarthquakesAsyncTask extends AsyncTask<String, Void, ArrayList<Earthquake>> {
-        @Override
-        protected ArrayList<Earthquake> doInBackground(String... urls) {
-            if (urls.length < 1 || urls[0] == null) {
-                return null;
-            }
-            return QueryUtils.extractEarthquakes(urls[0]);
-        }
+    @Override
+    public Loader<ArrayList<Earthquake>> onCreateLoader(int id, Bundle args) {
+        return new EarthquakeLoader(this, QUERY);
+    }
 
-        @Override
-        protected void onPostExecute(ArrayList<Earthquake> earthquakes) {
-            mAdapter.clear();
-            if (earthquakes != null && !earthquakes.isEmpty()) {
-                mAdapter.addAll(earthquakes);
-            }
+    @Override
+    public void onLoadFinished(Loader<ArrayList<Earthquake>> loader, ArrayList<Earthquake> earthquakes) {
+        mAdapter.clear();
+        if (earthquakes != null && !earthquakes.isEmpty()) {
+            mAdapter.addAll(earthquakes);
         }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<ArrayList<Earthquake>> loader) {
+        mAdapter.clear();
     }
 
     @Override
@@ -87,7 +88,8 @@ public class EarthquakeActivity extends AppCompatActivity {
             }
         });
 
-        EarthquakesAsyncTask earthquakeTask = new EarthquakesAsyncTask();
-        earthquakeTask.execute(QUERY);
+
+        getLoaderManager().initLoader(EARTHQUAKE_LOADER_ID, null, this);
+
     }
 }
